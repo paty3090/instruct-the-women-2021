@@ -32,7 +32,8 @@ def latest_version(package_name):
     if response.status_code == 404:
         return None
     
-    response = response.json{}
+    response = response.json()
     version = response ['info'][version]
 
     return version
+    
