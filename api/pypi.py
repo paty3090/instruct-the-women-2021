@@ -33,7 +33,7 @@ def latest_version(package_name):
         return None
     
     response = response.json()
-    version = response ['info'][version]
+    version = response['info']['version']
 
     return version
     
