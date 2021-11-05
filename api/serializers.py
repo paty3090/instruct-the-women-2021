@@ -4,16 +4,37 @@ from .models import PackageRelease, Project
 from .pypi import version_exists, latest_version
 
 
-class CommentSerializer(serializers.Serializer):
+class PackageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PackageRelease
         fields = ["name", "version"]
-        extra_kwargs = {"version": {"required": True}}
+        extra_kwargs = {"version": {"required": False}}
 
 def validate(self, data):
         #TODO
-        return data
+        # Validar o pacote, checar se ele existe na versão especificada.
+        # Buscar a última versão caso ela não seja especificada pelo usuário.
+        # Subir a exceção `serializers.ValidationError()` se o pacote não
+        # for válido.
 
+        name = data.get('name', '')
+        version = data.get('version', '')
+
+        if version:
+            exit = version_exist(name, version)
+
+            if exit:
+                return data
+            else:
+                raise serializers. ValidationError({'error': "One or more packages do"})
+        else:
+            latest = latest_version(name)
+
+            if latest:
+                data['version'] = latest
+                return data
+
+        return data           
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
@@ -22,26 +43,16 @@ class ProjectSerializer(serializers.ModelSerializer):
     packages = PackageSerializer(many=True)
 
     def create(self, validated_data):
+        # TODO
+        # Salvar o projeto e seus pacotes associados.
+        #
+        # Algumas referência para uso de models do Django:
+        # - https://docs.djangoproject.com/en/3.2/topics/db/models/
+        # - https://www.django-rest-framework.org/api-guide/serializers/#saving-instances
+        packages = validated_data["packages"]
 
-    def update(self, instance, validated_data):
-        instance.email = validated_data.get('email', instance.email)
-        instance.content = validated_data.get('content', instance.content)
-        instance.created = validated_data.get('created', instance.created)
-        return instance
+        projeto = Project.objects.create(name=validated_data["name"])
 
-     from django.db import models
-
-class Person(models.Model):
-    name = models.CharField(max_length=128)
-
-    def __str__(self):
-        return self.name
-
-class Group(models.Model):
-    name = models.CharField(max_length=128)
-    members = models.ManyToManyField(Person, through='Membership')
-
-    def __str__(self):
-        return self.name
+       
 
         
